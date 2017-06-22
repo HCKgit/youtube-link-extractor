@@ -1,7 +1,7 @@
-# YouTube-links-vuejs
+# YouTube-link-extractor
 YouTube link extractor by Vuejs
 
-Demo : https://ahadyekta.github.io/youtube-links-vuejs
+Demo : https://ahadyekta.github.io/youtube-link-extractor
 
 Give youtube channel id, username or playlist id (from url) and get the list of watch links. Then you can use rapidleech to batch download the links. 
 
