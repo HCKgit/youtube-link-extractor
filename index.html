@@ -181,7 +181,7 @@
     new Vue({
         el: '#container',
         data: {
-            apikey: '',
+            apikey: 'AIzaSyDUA6YcNXn7CUKCgVKDfDHIVeEgHKaOBK4',
             channel: '',
             playlists: [],
             videos: [],
@@ -190,12 +190,14 @@
             showItems: 'all',
             columns: 'all',
             checkAll: false,
-            allNum: 0
+            allNum: 0,
+            err : null
         },
         methods: {
             searchChannel: function () {
                 this.videos = [];
                 this.playlists = [];
+               
                 if (this.channel && this.apikey) {
                     this.$http.get('https://www.googleapis.com/youtube/v3/channels', {
                         params: {
@@ -207,16 +209,21 @@
                     }).then(
                         function (data) {
                             if (data.body.pageInfo.totalResults > 1) {
+                          
                                 this.playlists = data.body.items;
 
                             } else if (data.body.pageInfo.totalResults == 1) {
                                 this.loadVideos(data.body.items[0].contentDetails.relatedPlaylists.uploads);
+                                this.searchPlaylist();
+                               
                             } else {
+                              
                                 this.searchPlaylist();
                             }
                         }, function (data) {
+                            
                             var error = JSON.parse(data.bodyText).error;
-                            alert('Error' + error.code + ':' + error.message);
+                            // alert('Error' + error.code + ':' + error.message);
                         });
                 } else {
                     alert('fill all inputs');
@@ -224,7 +231,7 @@
                 return false;
             },
             searchPlaylist: function () {
-
+               
                 this.$http.get('https://www.googleapis.com/youtube/v3/playlists', {
                     params: {
                         channelId: this.channel,
@@ -238,13 +245,14 @@
                         if (data.body.pageInfo.totalResults) {
                             this.playlists = data.body.items;
                         } else {
-                            alert('no playlist found');
+
                         }
 
                     }, function (data) {
-                        // error callback
-                        var error = JSON.parse(data.bodyText).error;
-                        alert('Error' + error.code + ':' + error.message);
+                        // error callback////////////////////////////////
+                        this.err = JSON.parse(data.bodyText).error;
+                        this.loadVideos(this.channel);
+                        
                     });
             },
             loadVideos: function (playListId) {
@@ -271,7 +279,7 @@
                             this.allNum = data.body.pageInfo.totalResults;
                             this.videos = this.videos.concat(data.body.items);
                         } else {
-                            alert('no video');
+
                         }
                     });
                 return false;
