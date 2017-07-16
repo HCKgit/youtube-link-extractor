@@ -213,8 +213,9 @@
                                 this.playlists = data.body.items;
 
                             } else if (data.body.pageInfo.totalResults == 1) {
-                                this.loadVideos(data.body.items[0].contentDetails.relatedPlaylists.uploads);
                                 this.searchPlaylist();
+                                this.loadVideos(data.body.items[0].contentDetails.relatedPlaylists.uploads);
+                                
                                
                             } else {
                               
@@ -251,7 +252,7 @@
                     }, function (data) {
                         // error callback////////////////////////////////
                         this.err = JSON.parse(data.bodyText).error;
-                        this.loadVideos(this.channel);
+                        //this.loadVideos(this.channel);
                         
                     });
             },
