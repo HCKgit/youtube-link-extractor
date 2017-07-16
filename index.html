@@ -119,7 +119,7 @@
             href="https://developers.google.com/places/web-service/get-api-key">(How to get?)</a> <br>
         <label>Channel Id</label>&nbsp;&nbsp;&nbsp;&nbsp;<input v-model='channel' type="text"
                                                                 placeholder="YouTube Channel Id,Username,Playlist Id"/>
-        <button @click='searchChannel'>Search</button>
+        <button @click='searchChannel' :disabled="loading" >Search</button>
     </div>
     <ul>
         <li v-for="playlist in playlists">
@@ -168,7 +168,7 @@
             </table>
 
             <div class="more-div">
-                <button href="#" @click='loadVideos()' v-show="videos.length < allNum">More Videos</button>
+                <button href="#" @click='loadVideos()' :disabled="loading" v-show="videos.length < allNum">More Videos</button>
                 {{videos.length}}/{{allNum}}
             </div>
         </div>
@@ -191,14 +191,16 @@
             columns: 'all',
             checkAll: false,
             allNum: 0,
-            err : null
+            err : null,
+            loading: false
         },
         methods: {
             searchChannel: function () {
                 this.videos = [];
                 this.playlists = [];
-               
+                
                 if (this.channel && this.apikey) {
+                    this.loading = true;
                     this.$http.get('https://www.googleapis.com/youtube/v3/channels', {
                         params: {
                             part: 'contentDetails',
@@ -221,8 +223,9 @@
                               
                                 this.searchPlaylist();
                             }
+                            this.loading = false;
                         }, function (data) {
-                            
+                            this.loading = false;
                             var error = JSON.parse(data.bodyText).error;
                             // alert('Error' + error.code + ':' + error.message);
                         });
@@ -232,8 +235,9 @@
                 return false;
             },
             searchPlaylist: function () {
-               
+               this.loading = true;
                 this.$http.get('https://www.googleapis.com/youtube/v3/playlists', {
+                    
                     params: {
                         channelId: this.channel,
                         maxResults: '50',
@@ -242,7 +246,7 @@
                     }
                 }).then(
                     function (data) {
-
+                        this.loading = false;
                         if (data.body.pageInfo.totalResults) {
                             this.playlists = data.body.items;
                         } else {
@@ -252,8 +256,7 @@
                     }, function (data) {
                         // error callback////////////////////////////////
                         this.err = JSON.parse(data.bodyText).error;
-                        //this.loadVideos(this.channel);
-                        
+                        this.loading = false; 
                     });
             },
             loadVideos: function (playListId) {
@@ -264,7 +267,7 @@
                     this.allNum = 0;
                     this.checkAll = false;
                 }
-
+                this.loading = true;
                 this.$http.get('https://www.googleapis.com/youtube/v3/playlistItems', {
                     params: {
                         part: 'snippet',
@@ -275,6 +278,7 @@
                     }
                 }).then(
                     function (data) {
+                        this.loading = false;
                         if (data.body.pageInfo.totalResults) {
                             this.nextPageToken = data.body.nextPageToken;
                             this.allNum = data.body.pageInfo.totalResults;
